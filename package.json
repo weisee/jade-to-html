@@ -15,7 +15,7 @@
   "keywords": [
     "jade",
     "html",
-    "compiller",
+    "compiller"
   ],
   "version": "0.1.0",
   "main": "./lib/jadeth",
