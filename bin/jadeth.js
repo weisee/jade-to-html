@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var curDir, dest, jadeth, path, resultExtension;
+var curDir, dest, jadeth, path, resultExtension, optionsFile;
 
 jadeth = require('../lib/jadeth');
 
@@ -36,7 +36,7 @@ Options file should have such structure:
 */
 
 
-optionsFile(process.argv[5] ? process.argv[5] : resultExtension);
+optionsFile = process.argv[5] ? process.argv[5] : resultExtension;
 
 jadeth(curDir, path, dest, optionsFile, resultExtension);
 
