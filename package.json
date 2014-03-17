@@ -1,0 +1,25 @@
+{
+  "name": "jada-to-html",
+  "author": {
+    "name": "Vitaly Zavarzin",
+    "url": "http://github.com/weisee"
+  },
+  "bin": {
+    "jadeth": "./bin/jadeth.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/weisee/jade-to-html.git"
+  },
+  "description": "Compile jade to html with data for domains",
+  "keywords": [
+    "jade",
+    "html",
+    "compiller",
+  ],
+  "version": "0.1.0",
+  "main": "./lib/jadeth",
+  "dependencies": {
+    "jade": "*"
+  }
+}
