@@ -85,9 +85,9 @@ renderFileSync = (filename) ->
   throw template if template instanceof Error
   fn = jade.compile template
   throw fn if fn instanceof Error
-  for domain, data of data.domains
+  for domain, domainData of data.domains
     compiledPath = resolveCompiledPath filename, domain
-    html = fn(data)
+    html = fn(domainData)
     throw html if html instanceof Error
     err = fs.writeFileSync compiledPath, html
     console.log compiledPath, ' compiled.'
