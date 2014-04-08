@@ -1,6 +1,5 @@
 fs = require 'fs'
 jade = require 'jade'
-spawn = require('child_process').spawn
 
 allowedFilenames = new RegExp('^.*\.jade$')
 watchDir = '/'
@@ -8,18 +7,21 @@ destinationDir = '/'
 data = {}
 resultExtenstion = 'html'
 
-module.exports = (currentDir, target, destDir, dataFile, resExt) ->
+module.exports = (currentDir, target, destDir, dataFile, resExt, watch) ->
   data = require(currentDir + '/' + dataFile)
   watchDir = currentDir + '/' + target 
   destinationDir = if destDir then currentDir + '/' + destDir else watchDir
   resultExtenstion = '.' + if resExt then resExt else resultExtenstion
 
-  console.log 'Start watching', watchDir
   console.log 'Render to ', destinationDir
   console.log 'With extension ', resultExtenstion
-
-  walkAndRender watchDir
-  fs.watch watchDir, handeWatch
+  if watch
+    console.log 'ASYNC MODE. Watch enabled.'
+    walkAndRender watchDir
+    fs.watch watchDir, handleWatch
+  else
+    console.log 'SYNC MODE.'
+    walkAndRenderSync watchDir
 
 walkAndRender = (dir) ->
   fs.readdir dir, (err, list) ->
@@ -30,6 +32,15 @@ walkAndRender = (dir) ->
       filename = dir + '/' + file
       renderOrWalk filename
 
+walkAndRenderSync = (dir) ->
+  list = fs.readdirSync dir
+  throw list if list instanceof Error
+  listLength = list.length
+  return null if not listLength
+  for file in list
+    filename = dir + '/' + file
+    renderOrWalkSync filename
+
 renderOrWalk = (filename) ->
   fs.stat filename, (err, stat) ->
     throw new Error(err) if err
@@ -38,7 +49,15 @@ renderOrWalk = (filename) ->
     else 
       renderFile filename
 
-handeWatch = (event, filename) ->
+renderOrWalkSync = (filename) ->
+  stat = fs.statSync filename
+  throw stat if stat instanceof Error
+  if stat and stat.isDirectory()
+    walkAndRenderSync filename
+  else 
+    renderFileSync filename
+
+handleWatch = (event, filename) ->
   return false if not allowedFilenames.test(filename)
   renderFile watchDir + '/' + filename
 
@@ -59,15 +78,26 @@ resolveCompiledPath = (filename, domain) ->
 
 renderFile = (filename) ->
   for domain, data of data.domains
-    console.log filename, domain, data
     compileJadeFile filename, domain, data
 
+renderFileSync = (filename) ->
+  template = fs.readFileSync filename, encoding: 'utf8'
+  throw template if template instanceof Error
+  fn = jade.compile template
+  throw fn if fn instanceof Error
+  for domain, data of data.domains
+    compiledPath = resolveCompiledPath filename, domain
+    html = fn(data)
+    throw html if html instanceof Error
+    err = fs.writeFileSync compiledPath, html
+    console.log compiledPath, ' compiled.'
+    throw err if err
 
 compileJadeFile = (filename, domain, data) ->
   data = data || {}
   jade.renderFile filename, data, (err, html) ->
-    return console.log err if err
+    return console.error err if err
     compiledPath = resolveCompiledPath filename, domain 
     fs.writeFile compiledPath, html, (err) ->
-      return console.log err if err
+      return console.error err if err
       console.log compiledPath, ' compiled.'

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var curDir, dest, jadeth, path, resultExtension, optionsFile;
+var curDir, dest, jadeth, path, resultExtension, optionsFile, watch;
 
 jadeth = require('../lib/jadeth');
 
@@ -16,6 +16,15 @@ path = process.argv[2];
 dest = process.argv[3];
 
 resultExtension = process.argv[4];
+
+watch = process.argv[6] || false;
+
+if (~['false', 'no', 'none', 'no-watch', false].indexOf(watch)) {
+  watch = false
+} else {
+  watch = true
+}
+
 
 /*
 Options file should have such structure:
@@ -38,5 +47,5 @@ Options file should have such structure:
 
 optionsFile = process.argv[5] ? process.argv[5] : resultExtension;
 
-jadeth(curDir, path, dest, optionsFile, resultExtension);
+jadeth(curDir, path, dest, optionsFile, resultExtension, watch);
 
